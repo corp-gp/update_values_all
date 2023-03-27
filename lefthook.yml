@@ -1,0 +1,5 @@
+pre-commit:
+  commands:
+    rubocop:
+      glob: "*.rb"
+      run: bundle exec rubocop --autocorrect-all --fail-level A --color --display-style-guide --force-exclusion {staged_files}

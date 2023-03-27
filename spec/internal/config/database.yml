@@ -1,0 +1,8 @@
+test:
+  adapter: postgresql
+  encoding: unicode
+  database: <%= ENV.fetch('PG_DATABASE') %>
+  username: <%= ENV.fetch('PG_USERNAME') %>
+  password: <%= ENV.fetch('PG_PASSWORD') %>
+  host: <%= ENV.fetch('PG_HOST') %>
+  port: <%= ENV.fetch('PG_PORT') %>
