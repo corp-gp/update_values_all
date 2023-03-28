@@ -31,7 +31,7 @@ User.create!(id: 2, city: 'Vladivostok', name: 'Petr')
 
 The gem defines method `User.update_values_all` which allows to batch update attributes
 
-```
+```ruby
 changed_ids =
   User.update_values_all(
     [
@@ -42,22 +42,26 @@ changed_ids =
  )
 ```
 
+```
 changed_ids # [1, 2]
 User.find(1).name # Hanz
 User.find(1).city # Berlin
 User.find(2).name # John
 User.find(2).city # London
+```
 
 Records are only updated if attributes changed (and also `updated_at`).
 
 Sometimes you want to update `updated_at` regardless of whether the attributes have changed. In that case you may pass param `touch: true`.
 
-```
+```ruby
 changed_ids = User.update_values_all([{ id: 1, name: 'Hanz' }], key_to_match: :id, touch: true)
 ```
 
+```
 changed_ids = []
 User.find(1).updated_at # changed
+```
 
 ## Development
 
