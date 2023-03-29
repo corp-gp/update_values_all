@@ -4,7 +4,7 @@ module UpdateValuesAll
   module Adapters
     module Postgres
 
-      def update_values_all(data, key_to_match:, touch: false, sql_update_expression: 'updated_at = CURRENT_TIMESTAMP')
+      def pg_update_values_all(data, key_to_match:, touch: false, sql_update_expression: 'updated_at = CURRENT_TIMESTAMP')
         keys = data.first.keys
 
         sql_values = +''

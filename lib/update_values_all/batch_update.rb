@@ -1,16 +1,19 @@
 # frozen_string_literal: true
 
+require 'update_values_all/adapters/postgres'
+
 module UpdateValuesAll
   module BatchUpdate
 
-    def self.extended(active_record_base)
-      active_record_base.define_singleton_method(:inherited) do |subclass|
-        super(subclass)
+    def self.extended(klass)
+      if defined?(::PG::Connection)
+        klass.extend(UpdateValuesAll::Adapters::Postgres)
+      end
+    end
 
-        case subclass.connection.raw_connection
-        when ::PG::Connection
-          subclass.extend UpdateValuesAll::Adapters::Postgres
-        end
+    def update_values_all(*args, **keyword_args)
+      if defined?(::PG::Connection) && connection.raw_connection.is_a?(::PG::Connection)
+        pg_update_values_all(*args, **keyword_args)
       end
     end
 

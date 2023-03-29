@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'update_values_all/batch_update'
+
 module UpdateValuesAll
   class Railtie < ::Rails::Railtie
 
