@@ -17,6 +17,11 @@ RSpec.describe UpdateValuesAll::Adapters::Postgres do
     expect(User.order(:id).pluck(:state)).to eq(%w[confirmed blocked])
   end
 
+  it 'skips update if empty data' do
+    changes_ids = User.update_values_all([], key_to_match: :id)
+    expect(changes_ids).to eq([])
+  end
+
   it 'fills updated_at' do
     user = User.create!(id: 1, updated_at: 5.days.ago)
 

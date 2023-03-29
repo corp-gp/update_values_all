@@ -11,9 +11,11 @@ module UpdateValuesAll
       end
     end
 
-    def update_values_all(*args, **keyword_args)
+    def update_values_all(data, **keyword_args)
+      return [] if data.empty?
+
       if defined?(::PG::Connection) && connection.raw_connection.is_a?(::PG::Connection)
-        pg_update_values_all(*args, **keyword_args)
+        pg_update_values_all(data, **keyword_args)
       end
     end
 
