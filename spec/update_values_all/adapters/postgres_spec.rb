@@ -113,4 +113,13 @@ RSpec.describe UpdateValuesAll::Adapters::Postgres do
       }.to change { user.reload.updated_at }
     end
   end
+
+  it 'updates data by primary key if key_to_match is not specified' do
+    User.create!(id: 1, state: 'pending')
+    User.create!(id: 2, state: 'pending')
+
+    User.update_values_all([{ id: 1, state: 'confirmed' }, { id: 2, state: 'blocked' }])
+
+    expect(User.order(:id).pluck(:state)).to eq(%w[confirmed blocked])
+  end
 end
