@@ -38,7 +38,7 @@ changed_ids =
       { id: 1, address: { city: 'Berlin' }, name: 'Hanz' },
       { id: 2, address: { city: 'London' }, name: 'John' }
     ],
-    key_to_match: :id,
+    key_to_match: :id, # :key_to_match can be omitted if it matches primary key
  )
 ```
 
