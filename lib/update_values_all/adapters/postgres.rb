@@ -6,6 +6,7 @@ module UpdateValuesAll
 
       def pg_update_values_all(data, key_to_match:, touch: false, sql_update_expression: 'updated_at = CURRENT_TIMESTAMP')
         keys = data.first.keys
+        key_to_match = Array.wrap(key_to_match)
 
         sql_values = +''
         data.each do |hash_row|
@@ -31,7 +32,7 @@ module UpdateValuesAll
             +yield
           else
             keys
-              .reject { |key| key == key_to_match }
+              .reject { |key| key_to_match.include?(key) }
               .map { |key| "#{key} = updated_data.#{key}::#{sql_types[key]}" }
               .join(', ')
           end
@@ -40,7 +41,7 @@ module UpdateValuesAll
             'TRUE'
           else
             keys
-              .reject { |key| key == key_to_match }
+              .reject { |key| key_to_match.include?(key) }
               .map { |key| "#{table_name}.#{key} IS DISTINCT FROM updated_data.#{key}::#{sql_types[key]}" }
               .join(' OR ')
           end
@@ -50,12 +51,12 @@ module UpdateValuesAll
         end
 
         existing_data_sql =
-          select("#{table_name}.#{key_to_match}") # rubocop:disable Gp/PotentialSqlInjection
-            .where("#{key_to_match} IN (SELECT #{key_to_match} FROM updated_data)")
+          select(format_keys(key_to_match, table_name)) # rubocop:disable Gp/PotentialSqlInjection
+            .where("(#{format_keys(key_to_match)}) IN (SELECT #{format_keys(key_to_match)} FROM updated_data)")
             .to_sql
 
         changed_ids =
-          connection.query(<<~SQL).flatten # rubocop:disable Gp/PotentialSqlInjection
+          connection.query(<<~SQL) # rubocop:disable Gp/PotentialSqlInjection
             WITH
               updated_data(#{updated_keys}) AS (
                 VALUES #{sql_values}
@@ -65,19 +66,23 @@ module UpdateValuesAll
               )
             UPDATE #{table_name}
             SET #{set_expr}
-            FROM updated_data JOIN existing_data ON existing_data.#{key_to_match} = updated_data.#{key_to_match}
+            FROM updated_data JOIN existing_data ON (#{format_keys(key_to_match, 'existing_data')}) = (#{format_keys(key_to_match, 'updated_data')})
             WHERE
-                  updated_data.#{key_to_match} = #{table_name}.#{key_to_match}
-              AND #{table_name}.#{key_to_match} = existing_data.#{key_to_match}
+                  (#{format_keys(key_to_match, 'updated_data')}) = (#{format_keys(key_to_match, table_name)})
+              AND (#{format_keys(key_to_match, table_name)}) = (#{format_keys(key_to_match, 'existing_data')})
               AND (#{only_changed_expr})
-            RETURNING #{table_name}.#{key_to_match}
+            RETURNING #{format_keys(key_to_match, table_name)}
           SQL
 
         connection.query_cache.clear if connection.query_cache_enabled
 
-        changed_ids
+        # When the primary key is composite (multi-column), we return an array of arrays
+        key_to_match.second ? changed_ids : changed_ids.flatten
       end
 
+      private def format_keys(keys, table_name = nil) # rubocop:disable Gp/OptArgParameters
+        keys.map { |key| table_name ? "#{table_name}.#{key}" : key }.join(", ")
+      end
     end
   end
 end
