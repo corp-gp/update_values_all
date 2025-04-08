@@ -1,11 +1,6 @@
 name: Ruby
 
-on:
-  push:
-    branches:
-      - main
-
-  pull_request:
+on: [push, pull_request]
 
 jobs:
   rspec:
@@ -51,5 +46,5 @@ jobs:
         bundle install
         bundle exec appraisal install
 
-    - name: Run specs for ${{ matrix.appraisal }}
+    - name: Run specs for ${{ matrix.ruby }} ${{ matrix.appraisal }}
       run: bundle exec appraisal ${{ matrix.appraisal }} rspec
