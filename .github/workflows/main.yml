@@ -3,7 +3,6 @@ name: Ruby
 on:
   push:
   pull_request:
-  workflow_dispatch:
 
 jobs:
   rspec:
@@ -33,6 +32,7 @@ jobs:
           --health-retries 5
 
     strategy:
+      fail-fast: false
       matrix:
         ruby:
           - 3.1
@@ -49,5 +49,7 @@ jobs:
       with:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true
-    - name: Run specs for ${{ matrix.ruby }} ${{ matrix.appraisal }}
+    - name: Install Appraisals
+      run: bundle exec appraisal install
+    - name: Run tests for ${{ matrix.ruby }} ${{ matrix.appraisal }}
       run: bundle exec appraisal ${{ matrix.appraisal }} rspec
