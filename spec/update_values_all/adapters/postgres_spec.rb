@@ -124,6 +124,12 @@ RSpec.describe UpdateValuesAll::Adapters::Postgres do
   end
 
   context 'when composite primary keys' do
+    before(:each) do
+      if ActiveRecord.gem_version < Gem::Version.new("7.1.0")
+        skip("Composite primary keys not supported in ActiveRecord < 7.1")
+      end
+    end
+
     it 'updates attributes for records with composite primary keys' do
       ProductUser.create!(product_id: 1, user_id: 1, state: 'pending')
       ProductUser.create!(product_id: 2, user_id: 2, state: 'pending')

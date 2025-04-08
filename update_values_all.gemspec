@@ -29,7 +29,7 @@ Gem::Specification.new do |spec|
     end
   spec.require_paths = ['lib']
 
-  spec.add_dependency 'activerecord', '>= 7.1'
+  spec.add_development_dependency "appraisal"
 
   # For more information and examples about making a new gem, check out our
   # guide at: https://bundler.io/guides/creating_gem.html
