@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'bundler'
+require 'logger'
 require 'rails'
 require 'dotenv/rails-now'
 require 'dotenv/load'

@@ -122,4 +122,36 @@ RSpec.describe UpdateValuesAll::Adapters::Postgres do
 
     expect(User.order(:id).pluck(:state)).to eq(%w[confirmed blocked])
   end
+
+  context 'when composite primary keys' do
+    before(:each) do
+      if ActiveRecord.gem_version < Gem::Version.new("7.1.0")
+        skip("Composite primary keys not supported in ActiveRecord < 7.1")
+      end
+    end
+
+    it 'updates attributes for records with composite primary keys' do
+      ProductUser.create!(product_id: 1, user_id: 1, state: 'pending')
+      ProductUser.create!(product_id: 2, user_id: 2, state: 'pending')
+
+      changed_ids =
+        ProductUser.update_values_all(
+          [
+            { product_id: 1, user_id: 1, state: 'confirmed' },
+            { product_id: 2, user_id: 2, state: 'blocked' }
+          ],
+        )
+
+      expect(changed_ids).to eq [[1, 1], [2, 2]]
+      expect(ProductUser.find(changed_ids).pluck(:state)).to eq(%w[confirmed blocked])
+    end
+
+    it 'raises an exception when one of the composite primary keys is missing' do
+      ProductUser.create!(product_id: 1, user_id: 1, state: 'pending')
+
+      expect {
+        ProductUser.update_values_all([{ product_id: 1, state: 'confirmed' }])
+      }.to raise_error(ActiveRecord::StatementInvalid)
+    end
+  end
 end
